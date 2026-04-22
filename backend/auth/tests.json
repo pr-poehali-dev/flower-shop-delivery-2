@@ -1,0 +1,49 @@
+{
+  "tests": [
+    {
+      "name": "Регистрация нового покупателя",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "register", "phone": "+79990000001", "password": "secret123", "name": "Тест Покупатель" },
+      "expectedStatus": 201,
+      "expectedBody": { "token": "string", "customer": { "phone": "+79990000001" } },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Повторная регистрация — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "register", "phone": "+79990000001", "password": "secret123" },
+      "expectedStatus": 400,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Вход с верными данными",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "login", "phone": "+79990000001", "password": "secret123" },
+      "expectedStatus": 200,
+      "expectedBody": { "token": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Вход с неверным паролем",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "login", "phone": "+79990000001", "password": "wrongpass" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Получение профиля без токена",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "me", "token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
