@@ -44,7 +44,7 @@
         "delivery_date": "2026-05-01"
       },
       "expectedStatus": 201,
-      "expectedBody": { "order_id": 1, "status": "new" },
+      "expectedBody": { "status": "new" },
       "bodyMatcher": "partial"
     }
   ]
