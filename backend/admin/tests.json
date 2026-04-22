@@ -1,0 +1,40 @@
+{
+  "tests": [
+    {
+      "name": "Вход с неверным паролем",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "login", "password": "wrong" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "get_orders без токена — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "get_orders", "admin_token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "get_analytics без токена — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "get_analytics", "admin_token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "get_products без токена — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "get_products", "admin_token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
