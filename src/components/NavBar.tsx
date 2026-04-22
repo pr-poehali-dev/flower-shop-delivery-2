@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/context/AuthContext";
 import AuthModal from "@/components/AuthModal";
@@ -20,6 +21,7 @@ export default function NavBar({ scrollTo }: NavBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const { customer, logout } = useAuth();
+  const navigate = useNavigate();
 
   const handleScroll = (id: string) => {
     scrollTo(id);
@@ -53,10 +55,13 @@ export default function NavBar({ scrollTo }: NavBarProps) {
 
             {customer ? (
               <div className="flex items-center gap-3">
-                <div className="flex items-center gap-2 text-sm font-body text-foreground">
+                <button
+                  onClick={() => navigate("/account")}
+                  className="flex items-center gap-2 text-sm font-body hover:opacity-80 transition-opacity"
+                >
                   <Icon name="UserCircle" size={18} className="text-gold" />
                   <span className="text-gold">{customer.name || customer.phone}</span>
-                </div>
+                </button>
                 <button
                   onClick={logout}
                   className="text-xs font-body text-muted-foreground hover:text-foreground border border-border px-3 py-1.5 transition-colors hover:border-foreground"
@@ -98,7 +103,12 @@ export default function NavBar({ scrollTo }: NavBarProps) {
 
             {customer ? (
               <div className="flex items-center justify-between pt-2 border-t border-border">
-                <span className="font-body text-sm text-gold">{customer.name || customer.phone}</span>
+                <button
+                  onClick={() => { navigate("/account"); setMobileMenuOpen(false); }}
+                  className="font-body text-sm text-gold hover:opacity-80 transition-opacity"
+                >
+                  {customer.name || customer.phone}
+                </button>
                 <button onClick={logout} className="font-body text-xs text-muted-foreground">Выйти</button>
               </div>
             ) : (

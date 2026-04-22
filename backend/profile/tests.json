@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "get_profile без токена — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "get_profile", "token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "get_orders без токена — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "get_orders", "token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Неизвестное действие",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "unknown", "token": "" },
+      "expectedStatus": 401,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
