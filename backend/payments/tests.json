@@ -1,0 +1,31 @@
+{
+  "tests": [
+    {
+      "name": "get_settings — статус провайдеров",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "get_settings" },
+      "expectedStatus": 200,
+      "expectedBody": { "yukassa": false, "sberbank": false },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "create_payment без провайдера — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "create_payment", "provider": "", "order_id": 1, "amount": 1000, "return_url": "https://example.com" },
+      "expectedStatus": 400,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "create_payment yukassa без ключей — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": { "action": "create_payment", "provider": "yukassa", "order_id": 1, "amount": 1000, "return_url": "https://example.com" },
+      "expectedStatus": 400,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    }
+  ]
+}

@@ -2,6 +2,7 @@ import { useState } from "react";
 import { useNavigate } from "react-router-dom";
 import Icon from "@/components/ui/icon";
 import { useAuth } from "@/context/AuthContext";
+import { useCart } from "@/context/CartContext";
 import AuthModal from "@/components/AuthModal";
 
 const navItems = [
@@ -21,6 +22,7 @@ export default function NavBar({ scrollTo }: NavBarProps) {
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const [authOpen, setAuthOpen] = useState(false);
   const { customer, logout } = useAuth();
+  const { totalCount } = useCart();
   const navigate = useNavigate();
 
   const handleScroll = (id: string) => {
@@ -53,6 +55,20 @@ export default function NavBar({ scrollTo }: NavBarProps) {
               +7 (4932) 00-00-00
             </a>
 
+            {/* Корзина */}
+            <button
+              onClick={() => navigate("/cart")}
+              className="relative flex items-center gap-1.5 border border-border text-foreground px-3 py-1.5 hover:border-gold hover:text-gold transition-all"
+            >
+              <Icon name="ShoppingCart" size={16} />
+              <span className="font-body text-xs">Корзина</span>
+              {totalCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-gold text-background text-[10px] font-body font-medium w-5 h-5 rounded-full flex items-center justify-center">
+                  {totalCount}
+                </span>
+              )}
+            </button>
+
             {customer ? (
               <div className="flex items-center gap-3">
                 <button
@@ -80,12 +96,20 @@ export default function NavBar({ scrollTo }: NavBarProps) {
             )}
           </div>
 
-          <button
-            className="md:hidden text-gold"
-            onClick={() => setMobileMenuOpen(!mobileMenuOpen)}
-          >
-            <Icon name={mobileMenuOpen ? "X" : "Menu"} size={24} />
-          </button>
+          <div className="md:hidden flex items-center gap-3">
+            {/* Корзина мобильная */}
+            <button onClick={() => navigate("/cart")} className="relative text-foreground hover:text-gold transition-colors">
+              <Icon name="ShoppingCart" size={22} />
+              {totalCount > 0 && (
+                <span className="absolute -top-2 -right-2 bg-gold text-background text-[10px] font-body font-medium w-4 h-4 rounded-full flex items-center justify-center">
+                  {totalCount}
+                </span>
+              )}
+            </button>
+            <button className="text-gold" onClick={() => setMobileMenuOpen(!mobileMenuOpen)}>
+              <Icon name={mobileMenuOpen ? "X" : "Menu"} size={24} />
+            </button>
+          </div>
         </div>
 
         {mobileMenuOpen && (

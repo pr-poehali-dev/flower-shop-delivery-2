@@ -1,8 +1,9 @@
 import { useState, useEffect, useCallback } from "react";
 import Icon from "@/components/ui/icon";
 
-const ADMIN_URL = "https://functions.poehali.dev/f4fc8f7f-2f61-488d-b919-875f039728f0";
-const TOKEN_KEY = "flora_admin_token";
+const ADMIN_URL    = "https://functions.poehali.dev/f4fc8f7f-2f61-488d-b919-875f039728f0";
+const PAYMENTS_URL = "https://functions.poehali.dev/d4b55e5a-9f15-49bc-b688-27477a344b88";
+const TOKEN_KEY    = "flora_admin_token";
 
 const STATUS_LABELS: Record<string, string> = {
   new: "Новый", confirmed: "Подтверждён",
@@ -19,7 +20,7 @@ const STATUS_COLORS: Record<string, string> = {
 function fmt(n: number) { return n.toLocaleString("ru-RU"); }
 function fmtDate(s: string) { return new Date(s).toLocaleDateString("ru-RU", { day: "numeric", month: "short", year: "numeric" }); }
 
-type Tab = "orders" | "analytics" | "products";
+type Tab = "orders" | "analytics" | "products" | "payments";
 
 interface Order {
   id: number; status: string; total_price: number;
@@ -535,6 +536,112 @@ function ProductsTab({ token }: { token: string }) {
   );
 }
 
+// ── Раздел: Платёжные системы ────────────────────────────
+function PaymentsTab() {
+  const [settings, setSettings] = useState({ yukassa: false, sberbank: false });
+  const [loading, setLoading]   = useState(true);
+
+  useEffect(() => {
+    fetch(PAYMENTS_URL, { method: "POST", headers: { "Content-Type": "application/json" }, body: JSON.stringify({ action: "get_settings" }) })
+      .then(r => r.json()).then(d => { setSettings(d); setLoading(false); });
+  }, []);
+
+  const providers = [
+    {
+      key: "yukassa",
+      name: "ЮKassa",
+      icon: "CreditCard",
+      active: settings.yukassa,
+      description: "Самая популярная платёжная система в России. Принимает карты, СБП, Яндекс Pay, Apple Pay.",
+      secrets: [
+        { name: "YUKASSA_SHOP_ID", label: "ID магазина", hint: "Найдите в личном кабинете ЮKassa → Настройки → Данные магазина" },
+        { name: "YUKASSA_SECRET_KEY", label: "Секретный ключ", hint: "ЮKassa → Настройки → API-ключи → Секретный ключ" },
+      ],
+      link: "https://yookassa.ru",
+      linkLabel: "Открыть ЮKassa",
+    },
+    {
+      key: "sberbank",
+      name: "Сбербанк Эквайринг",
+      icon: "Landmark",
+      active: settings.sberbank,
+      description: "Интернет-эквайринг от Сбербанка. Оплата картами Visa, Mastercard, МИР через форму Сбера.",
+      secrets: [
+        { name: "SBERBANK_USERNAME", label: "Логин", hint: "Логин в системе эквайринга Сбербанка (заканчивается на -api)" },
+        { name: "SBERBANK_PASSWORD", label: "Пароль", hint: "Пароль от системы эквайринга Сбербанка" },
+      ],
+      link: "https://securepayments.sberbank.ru",
+      linkLabel: "Открыть Сбербанк",
+    },
+  ];
+
+  if (loading) return (
+    <div className="flex items-center gap-2 text-muted-foreground py-12 justify-center">
+      <Icon name="Loader" size={18} className="animate-spin" />
+      <span className="font-body text-sm">Загружаем настройки...</span>
+    </div>
+  );
+
+  return (
+    <div className="space-y-6 max-w-2xl">
+      <p className="font-body text-sm text-muted-foreground">
+        Подключите платёжные системы, добавив секреты в панели управления. После добавления статус обновится автоматически.
+      </p>
+
+      {providers.map(p => (
+        <div key={p.key} className={`bg-card border p-6 ${p.active ? "border-emerald-400/40" : "border-border"}`}>
+          <div className="flex items-center justify-between mb-4">
+            <div className="flex items-center gap-3">
+              <Icon name={p.icon} size={20} className={p.active ? "text-emerald-400" : "text-muted-foreground"} />
+              <h3 className="font-display text-2xl">{p.name}</h3>
+            </div>
+            <span className={`font-body text-xs px-2.5 py-1 border ${p.active ? "text-emerald-400 border-emerald-400 bg-emerald-400/10" : "text-muted-foreground border-border"}`}>
+              {p.active ? "✓ Подключено" : "Не настроено"}
+            </span>
+          </div>
+
+          <p className="font-body text-sm text-muted-foreground mb-5">{p.description}</p>
+
+          <div className="space-y-3 mb-5">
+            <p className="font-body text-xs text-muted-foreground uppercase tracking-wide">Необходимые секреты:</p>
+            {p.secrets.map(s => (
+              <div key={s.name} className="bg-background border border-border p-3">
+                <div className="flex items-center justify-between mb-1">
+                  <code className="font-body text-xs text-gold">{s.name}</code>
+                  <span className="font-body text-xs text-muted-foreground">{s.label}</span>
+                </div>
+                <p className="font-body text-xs text-muted-foreground">{s.hint}</p>
+              </div>
+            ))}
+          </div>
+
+          <div className="flex items-center gap-3 pt-4 border-t border-border">
+            <Icon name="Info" size={14} className="text-muted-foreground flex-shrink-0" />
+            <p className="font-body text-xs text-muted-foreground">
+              Добавьте секреты через{" "}
+              <span className="text-gold">Ядро → Секреты</span>{" "}
+              в панели управления, затем обновите страницу.
+            </p>
+          </div>
+        </div>
+      ))}
+
+      <div className="bg-card border border-border p-5">
+        <div className="flex items-start gap-3">
+          <Icon name="ShieldCheck" size={16} className="text-gold mt-0.5 flex-shrink-0" />
+          <div>
+            <p className="font-body text-sm font-medium mb-1">Безопасность</p>
+            <p className="font-body text-xs text-muted-foreground">
+              Ключи хранятся в зашифрованных секретах и никогда не передаются на фронтенд.
+              Все платежи обрабатываются напрямую между покупателем и платёжной системой.
+            </p>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 // ── Главный компонент ────────────────────────────────────
 export default function Admin() {
   const [token, setToken] = useState(() => localStorage.getItem(TOKEN_KEY) || "");
@@ -564,9 +671,10 @@ export default function Admin() {
         {/* Табы */}
         <div className="flex border-b border-border mb-8 gap-1">
           {([
-            { key: "orders", label: "Заказы", icon: "ShoppingBag" },
-            { key: "analytics", label: "Аналитика", icon: "BarChart2" },
-            { key: "products", label: "Товары", icon: "Package" },
+            { key: "orders",   label: "Заказы",    icon: "ShoppingBag" },
+            { key: "analytics",label: "Аналитика", icon: "BarChart2" },
+            { key: "products", label: "Товары",    icon: "Package" },
+            { key: "payments", label: "Оплата",    icon: "CreditCard" },
           ] as { key: Tab; label: string; icon: string }[]).map(t => (
             <button key={t.key} onClick={() => setTab(t.key)}
               className={`flex items-center gap-2 px-5 py-3 font-body text-sm tracking-wide transition-all border-b-2 -mb-px ${
@@ -580,6 +688,7 @@ export default function Admin() {
         {tab === "orders"    && <OrdersTab    token={token} />}
         {tab === "analytics" && <AnalyticsTab token={token} />}
         {tab === "products"  && <ProductsTab  token={token} />}
+        {tab === "payments"  && <PaymentsTab />}
       </main>
     </div>
   );

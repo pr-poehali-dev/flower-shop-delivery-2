@@ -1,16 +1,18 @@
+import { useState } from "react";
 import Icon from "@/components/ui/icon";
+import { useCart } from "@/context/CartContext";
 
 const HERO_IMG = "https://cdn.poehali.dev/projects/bb5c7f43-41b6-4dc5-ad7b-cb4d2b242a42/files/45b70729-bb5e-44f9-8196-c1d3a7f11002.jpg";
 const PETALS_IMG = "https://cdn.poehali.dev/projects/bb5c7f43-41b6-4dc5-ad7b-cb4d2b242a42/files/a3d9d3aa-2026-47e1-9501-74ed9eff5138.jpg";
 const SHOP_IMG = "https://cdn.poehali.dev/projects/bb5c7f43-41b6-4dc5-ad7b-cb4d2b242a42/files/5a682a0d-a99b-49ba-897e-7034b8edec15.jpg";
 
 const catalog = [
-  { id: 1, name: "Нежность", desc: "Пионы, фрезия, эвкалипт", price: "3 200 ₽", img: HERO_IMG, tag: "Хит" },
-  { id: 2, name: "Ботаника", desc: "Розы, гортензия, зелень", price: "2 800 ₽", img: PETALS_IMG, tag: "Новинка" },
-  { id: 3, name: "Лесная сказка", desc: "Рустик с полевыми цветами", price: "2 400 ₽", img: SHOP_IMG, tag: "" },
-  { id: 4, name: "Золотой час", desc: "Хризантемы, солейролия", price: "1 900 ₽", img: HERO_IMG, tag: "" },
-  { id: 5, name: "Романтика", desc: "Красные розы классические", price: "3 500 ₽", img: PETALS_IMG, tag: "Хит" },
-  { id: 6, name: "Пастель", desc: "Эустома, лизиантус, мимоза", price: "2 600 ₽", img: SHOP_IMG, tag: "" },
+  { id: 1, name: "Нежность", desc: "Пионы, фрезия, эвкалипт", price: 3200, img: HERO_IMG, tag: "Хит" },
+  { id: 2, name: "Ботаника", desc: "Розы, гортензия, зелень", price: 2800, img: PETALS_IMG, tag: "Новинка" },
+  { id: 3, name: "Лесная сказка", desc: "Рустик с полевыми цветами", price: 2400, img: SHOP_IMG, tag: "" },
+  { id: 4, name: "Золотой час", desc: "Хризантемы, солейролия", price: 1900, img: HERO_IMG, tag: "" },
+  { id: 5, name: "Романтика", desc: "Красные розы классические", price: 3500, img: PETALS_IMG, tag: "Хит" },
+  { id: 6, name: "Пастель", desc: "Эустома, лизиантус, мимоза", price: 2600, img: SHOP_IMG, tag: "" },
 ];
 
 interface HeroSectionProps {
@@ -18,6 +20,15 @@ interface HeroSectionProps {
 }
 
 export default function HeroSection({ scrollTo }: HeroSectionProps) {
+  const { addItem, items } = useCart();
+  const [added, setAdded] = useState<number | null>(null);
+
+  const handleAdd = (item: typeof catalog[0]) => {
+    addItem({ id: item.id, name: item.name, price: item.price, img: item.img });
+    setAdded(item.id);
+    setTimeout(() => setAdded(null), 1200);
+  };
+
   return (
     <>
       {/* ── HERO ──────────────────────────────────────── */}
@@ -117,11 +128,26 @@ export default function HeroSection({ scrollTo }: HeroSectionProps) {
                     <h3 className="font-display text-2xl font-light">{item.name}</h3>
                     <p className="font-body text-sm text-muted-foreground mt-1">{item.desc}</p>
                   </div>
-                  <p className="font-body text-lg text-gold font-medium whitespace-nowrap ml-4">{item.price}</p>
+                  <p className="font-body text-lg text-gold font-medium whitespace-nowrap ml-4">{item.price.toLocaleString("ru-RU")} ₽</p>
                 </div>
-                <button className="mt-4 w-full border border-border text-foreground py-2.5 text-sm font-body tracking-wide hover:border-gold hover:text-gold transition-all">
-                  Заказать
-                </button>
+                <div className="mt-4 flex gap-2">
+                  <button
+                    onClick={() => handleAdd(item)}
+                    className={`flex-1 flex items-center justify-center gap-2 py-2.5 text-sm font-body tracking-wide transition-all ${
+                      added === item.id
+                        ? "bg-gold text-background"
+                        : "border border-border text-foreground hover:border-gold hover:text-gold"
+                    }`}
+                  >
+                    <Icon name={added === item.id ? "Check" : "ShoppingCart"} size={14} />
+                    {added === item.id ? "Добавлено" : "В корзину"}
+                  </button>
+                  {items.find(i => i.id === item.id) && (
+                    <span className="flex items-center justify-center w-10 border border-gold text-gold text-sm font-body">
+                      {items.find(i => i.id === item.id)?.quantity}
+                    </span>
+                  )}
+                </div>
               </div>
             </div>
           ))}
