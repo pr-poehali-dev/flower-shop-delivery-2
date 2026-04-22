@@ -1,0 +1,51 @@
+{
+  "tests": [
+    {
+      "name": "Заказ без цветов — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "create_order",
+        "items": [],
+        "delivery_address": "ул. Пушкина, 1",
+        "recipient_phone": "+79990000001"
+      },
+      "expectedStatus": 400,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Заказ без адреса — ошибка",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "create_order",
+        "items": [{ "name": "Роза", "price": 180, "quantity": 3 }],
+        "delivery_address": "",
+        "recipient_phone": "+79990000001"
+      },
+      "expectedStatus": 400,
+      "expectedBody": { "error": "string" },
+      "bodyMatcher": "partial"
+    },
+    {
+      "name": "Успешный заказ (гость)",
+      "method": "POST",
+      "path": "/",
+      "body": {
+        "action": "create_order",
+        "items": [{ "name": "Роза", "price": 180, "quantity": 5 }, { "name": "Пион", "price": 320, "quantity": 2 }],
+        "green": "Эвкалипт",
+        "wrapping": "Крафт",
+        "note": "Тестовый заказ",
+        "delivery_address": "г. Иваново, ул. Тестовая, 1",
+        "recipient_name": "Тест",
+        "recipient_phone": "+79990000002",
+        "delivery_date": "2026-05-01"
+      },
+      "expectedStatus": 201,
+      "expectedBody": { "order_id": 1, "status": "new" },
+      "bodyMatcher": "partial"
+    }
+  ]
+}
